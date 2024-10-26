@@ -3,22 +3,42 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-three/drei": "^9.114.6",
+    "@react-three/fiber": "^9.0.0-alpha.8",
+    "@types/three": "^0.169.0",
+    "aframe": "^1.6.0",
+    "axios": "^1.7.7",
+    "classnames": "^2.5.1",
+    "framer-motion": "^11.11.10",
+    "i": "^0.3.7",
+    "leaflet": "^1.9.4",
+    "leaflet-routing-machine": "^3.2.12",
+    "next": "15.0.0",
     "react": "19.0.0-rc-65a56d0e-20241020",
     "react-dom": "19.0.0-rc-65a56d0e-20241020",
-    "next": "15.0.0"
+    "react-leaflet": "^4.2.1",
+    "react-map-gl": "^7.1.7",
+    "sass": "^1.80.4",
+    "socket.io-client": "^4.8.1",
+    "three": "^0.169.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@types/mapbox-gl": "^3.4.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/socket.io-client": "^3.0.0",
     "eslint": "^8",
-    "eslint-config-next": "15.0.0"
+    "eslint-config-next": "15.0.0",
+    "mapbox-gl": "^3.7.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5"
   }
 }
