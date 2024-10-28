@@ -9,7 +9,7 @@ import { useModalStore } from '@/store/useModalStore'
 import { useDijkstraStore } from '@/store/useDijkstraStore'
 import { useDirectionStore } from '@/store/useDirectionStore'
 
-mapboxgl.accessToken = 'pk.eyJ1Ijoic2hpbnNlb25nc3UiLCJhIjoiY20ybDBhcWdvMDc0ODJqcHN6dmJ3M25ocSJ9._gfXViqS433scncHL_ZPmg'
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 const MapComponent = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null)
@@ -20,6 +20,21 @@ const MapComponent = () => {
   const coordinates = coordinate
   const { isSimulation } = useDijkstraStore()
   const { setFinished } = useDirectionStore()
+  const { setDirection } = useDirectionStore()
+
+  const prevCoordinate = useRef<[number, number] | null>(null)
+
+  // 두 좌표 간의 각도를 계산하는 함수
+  const calculateAngle = (prevCoord: [number, number], newCoord: [number, number]) => {
+    const [prevLongitude, prevLatitude] = prevCoord
+    const [newLongitude, newLatitude] = newCoord
+    // Math.atan2는 두 점 사이의 방향을 라디안 단위의 각도로 반환
+    const angle = Math.atan2(newLatitude - prevLatitude, newLongitude - prevLongitude)
+    // atan2는 우측 기준이므로 반환된 각도를 북쪽을 0도로 기준으로 설정하기 위해 + Math.PI / 2라디안(90도)
+    // + 2 * Math.PI는 각도가 음수일 때 양수로 변환하기 위해 추가
+    // % (2 * Math.PI)는 0에서 360도(2 * Math.PI 라디안) 범위로 제한함
+    return (angle + Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI)
+  }
 
   useEffect(() => {
     if (!init) {
@@ -40,9 +55,13 @@ const MapComponent = () => {
     new Promise((resolve) => setTimeout(resolve, ms))
   const moveAlongCoordinates = async () => {
     for (const coordinate of coordinates) {
-      map.current?.setZoom(15)
+      if (prevCoordinate.current) {
+        const angle = calculateAngle(prevCoordinate.current, [coordinate[0], coordinate[1]])
+        setDirection({ y: angle })
+      }
+      prevCoordinate.current = [coordinate[0], coordinate[1]] // 매 반복마다 prevCoordinate 업데이트
       map.current?.setCenter([coordinate[0], coordinate[1]])
-      await delay(50)
+      await delay(30)
     }
     setFinished(true)
   }
@@ -63,7 +82,7 @@ const MapComponent = () => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       center: [latitude, longitude],
-      zoom: 20,
+      zoom: 16,
       pitch: 60,
       bearing: -20,
     })

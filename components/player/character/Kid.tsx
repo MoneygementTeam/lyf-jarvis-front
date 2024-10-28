@@ -25,7 +25,7 @@ export const Kid = ({ player, position }: KidProps) => {
       playerRef.current.rotation.y = direction.y
     }
   }, [direction])
-
+  
   return (
     <>
       <group
