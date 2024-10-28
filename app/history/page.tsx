@@ -3,7 +3,14 @@
 
 import { useEffect, useState } from 'react';
 import styles from './history.module.scss';
-import { ChatMessage } from '../types/chat';
+
+interface ChatMessage {
+  userId: string;
+  groupId: number | null;
+  jarvisMessage: string;
+  userMessage: string;
+  createdDate: number[];
+}
 
 export default function HistoryPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -11,50 +18,42 @@ export default function HistoryPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // 임시 데이터로 UI 구현 (실제로는 backend.co.kr API 호출)
-    const mockData: ChatMessage[] = [
-      {
-        recommendationGroupId: "1",
-        userMessage: "안녕하세요!",
-        jarvisMessage: "안녕하세요, 무엇을 도와드릴까요?"
-      },
-      {
-        recommendationGroupId: "2",
-        userMessage: "오늘 날씨 어때요?",
-        jarvisMessage: "오늘은 맑은 날씨가 예상됩니다."
-      },
-      {
-        recommendationGroupId: "3",
-        userMessage: "근처 맛집 추천해주세요",
-        jarvisMessage: "현재 위치 근처에 평점이 높은 레스토랑들을 찾아보았습니다. 이탈리안 레스토랑 \"La Cucina\", 한식당 \"맛있는 밥상\", 일식당 \"스시마루\"가 있습니다."
+    let isMounted = true;
+
+    const fetchChatHistory = async () => {
+      try {
+        const response = await fetch('https://moneygement-api.o-r.kr/api/history/bobsbeautifulife');
+        if (!response.ok) {
+          throw new Error('Failed to fetch chat history');
+        }
+        const data = await response.json();
+        if (isMounted) {
+          setChatHistory(data);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError('채팅 내역을 불러오는데 실패했습니다.');
+          console.error('Error:', err);
+          setLoading(false);
+        }
       }
-    ];
+    };
 
-    // 실제 구현시에는 아래 주석을 해제하고 사용
-    // const fetchChatHistory = async () => {
-    //   try {
-    //     const response = await fetch('backend.co.kr?userid=user123');
-    //     if (!response.ok) {
-    //       throw new Error('Failed to fetch chat history');
-    //     }
-    //     const data = await response.json();
-    //     setChatHistory(data);
-    //   } catch (err) {
-    //     setError('채팅 내역을 불러오는데 실패했습니다.');
-    //     console.error('Error:', err);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchChatHistory();
+    fetchChatHistory();
 
-    // 임시 데이터 사용
-    setChatHistory(mockData);
-    setLoading(false);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
+  const handleRecommendationClick = (groupId: number) => {
+    // 클릭 시 해당 그룹 ID를 사용하여 페이지 이동
+    window.location.href = `/?gid=${groupId}`;
+  };
+
   if (loading) {
-    return <div className={styles.loadingContainer}>로딩 중...</div>;
+    return <div className={styles.loadingContainer}>Loading...</div>;
   }
 
   if (error) {
@@ -66,18 +65,31 @@ export default function HistoryPage() {
       <h1 className={styles.title}>Chat History</h1>
       
       <div className={styles.chatContainer}>
-        {chatHistory.map((chat) => (
-          <div key={chat.recommendationGroupId} className={styles.chatBlock}>
+        {chatHistory.map((chat, index) => (
+          <div 
+            key={`${chat.userId}-${index}`} 
+            className={styles.chatBlock}
+          >
             <div className={styles.userMessage}>
               <div className={styles.messageContent}>
                 {chat.userMessage}
               </div>
             </div>
 
-            <div className={styles.jarvisMessage}>
+            <div 
+              className={`${styles.jarvisMessage} ${chat.groupId !== null ? styles.clickableMessage : ''}`}
+              onClick={chat.groupId !== null ? () => handleRecommendationClick(chat.groupId!) : undefined}
+              role={chat.groupId !== null ? "button" : undefined}
+              tabIndex={chat.groupId !== null ? 0 : undefined}
+            >
               <div className={styles.messageHeader}></div>
               <div className={styles.messageContent}>
                 {chat.jarvisMessage}
+                {chat.groupId !== null && (
+                  <div className={styles.recommendationIndicator}>
+                    🧐3D SIMULATION →
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -138,3 +138,35 @@ $spacing-unit: 8px;
     }
   }
 }
+
+.clickableMessage {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:focus {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+}
+
+.recommendationIndicator {
+  margin-top: 8px;
+  font-size: 0.9em;
+  color: #0066cc;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.jarvisMessage {
+  // 기존 스타일 유지
+  &.clickableMessage {
+    padding-right: 40px;  // 화살표 아이콘을 위한 공간
+  }
+}
