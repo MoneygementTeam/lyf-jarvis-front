@@ -8,10 +8,18 @@ import { coordinate } from '@/components/mapbox/coordinate/coordinate'
 import { useModalStore } from '@/store/useModalStore'
 import { useDijkstraStore } from '@/store/useDijkstraStore'
 import { useDirectionStore } from '@/store/useDirectionStore'
+import { fetchRoute } from '@/utils/api/routeApi'
+import { fetchRecommendations } from '@/utils/api/recommendApi'
+import { RouteMarker } from '@/components/mapbox/MapRouteMarkers'
+import { addMarkers } from '@/components/mapbox/MapRouteMarkers'
+
+
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 const MapComponent = () => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const gid = Number(searchParams.get('gid'));
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const { longitude, latitude, init, setLatitude, setLongitude, setInit } =
@@ -36,14 +44,31 @@ const MapComponent = () => {
     return (angle + Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI)
   }
 
+  const fetchData = async () => {
+    try {
+      // groupId를 이용해 추천 좌표 가져오기
+      const recommendations:RouteMarker[] = await fetchRecommendations(gid)
+      
+      // recommendations에서 latitude와 longitude로 points 배열 구성
+      const points:number[][] = recommendations.map(marker => [marker.longitude, marker.latitude])
+      
+      // 경로 데이터를 받아와 초기화
+      const routeCoordinates:number[][] = await fetchRoute(points)
+      console.log("Route Coordinates:", routeCoordinates)
+      initMap(routeCoordinates, recommendations)
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    }
+  }
+
+
   useEffect(() => {
     if (!init) {
       // 초기값 하드코딩 나중에는 값을 예정
-      setLatitude(37.2153254)
-      setLongitude(126.9752034)
+      setLatitude(1.2833)
+      setLongitude(103.8603)
       setInit(true)
-      initMap()
-
+      fetchData()
       setIsShow(true)
     } else {
       map.current?.setCenter([longitude, latitude])
@@ -74,7 +99,7 @@ const MapComponent = () => {
     }
   }, [isSimulation])
 
-  const initMap = () => {
+  const initMap = (routeCoordinates: number[][], recommendations:RouteMarker[]) => {
     if (map.current || !mapContainer.current) {
       return
     }
@@ -82,7 +107,7 @@ const MapComponent = () => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       center: [latitude, longitude],
-      zoom: 16,
+      zoom: 17,
       pitch: 60,
       bearing: -20,
     })
@@ -117,13 +142,8 @@ const MapComponent = () => {
       })
 
       if (map.current) {
-        new mapboxgl.Marker({ color: 'green' })
-          .setLngLat([126.975275, 37.215837])
-          .addTo(map.current)
-
-        new mapboxgl.Marker({ color: 'blue' })
-          .setLngLat([127.121747, 37.383164])
-          .addTo(map.current)
+        console.log("recommendations : " + recommendations)
+        addMarkers(map.current, recommendations)
       }
     })
   }
