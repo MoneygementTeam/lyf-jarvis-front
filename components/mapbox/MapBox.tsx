@@ -30,6 +30,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ setIsFinalModal, setIsShow 
   const { isSimulation } = useDijkstraStore()
   const { setFinished } = useDirectionStore()
   const { setDirection } = useDirectionStore()
+  const [routeCoordinates, setRouteCoordinates] = useState<number[][]>([]);
 
   const prevCoordinate = useRef<[number, number] | null>(null)
 
@@ -50,12 +51,19 @@ const MapComponent: React.FC<MapComponentProps> = ({ setIsFinalModal, setIsShow 
       // groupId를 이용해 추천 좌표 가져오기
       const recommendations:RouteMarker[] = await fetchRecommendations(gid)
       
+      if (recommendations.length > 0) {
+        // 추천 좌표의 첫 번째 요소를 초기 좌표로 설정
+        const firstRecommendation = recommendations[0];
+        setLatitude(firstRecommendation.latitude);
+        setLongitude(firstRecommendation.longitude);
+      }
+
       // recommendations에서 latitude와 longitude로 points 배열 구성
       const points:number[][] = recommendations.map(marker => [marker.longitude, marker.latitude])
       
       // 경로 데이터를 받아와 초기화
       const routeCoordinates:number[][] = await fetchRoute(points)
-      console.log("Route Coordinates:", routeCoordinates)
+      setRouteCoordinates(coordinates);
       initMap(routeCoordinates, recommendations)
     } catch (error) {
       console.error("Error fetching data:", error)
@@ -65,16 +73,12 @@ const MapComponent: React.FC<MapComponentProps> = ({ setIsFinalModal, setIsShow 
 
   useEffect(() => {
     if (!init) {
-      // 초기값 하드코딩 나중에는 값을 예정
-      setLatitude(1.2833)
-      setLongitude(103.8603)
       setInit(true)
       fetchData()
       setIsShow(true)
     } else {
       map.current?.setCenter([longitude, latitude])
     }
-    console.log('latitude', latitude, 'longitude', longitude)
   }, [latitude, longitude])
 
   const delay = (ms: number | undefined) =>
@@ -130,7 +134,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ setIsFinalModal, setIsShow 
         source: 'line',
         type: 'line',
         paint: {
-          'line-width': 12,
+          'line-width': 14,
           'line-emissive-strength': 0.8,
           'line-gradient': [
             'interpolate',
@@ -145,7 +149,6 @@ const MapComponent: React.FC<MapComponentProps> = ({ setIsFinalModal, setIsShow 
       })
 
       if (map.current) {
-        console.log("recommendations : " + recommendations)
         addMarkers(map.current, recommendations)
       }
     })

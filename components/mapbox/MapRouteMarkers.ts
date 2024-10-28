@@ -23,7 +23,6 @@ const categoryColor = (category: string): string => {
 export const addMarkers = (map: mapboxgl.Map, markers: RouteMarker[]) => {
   // 마커 추가
   markers.forEach(({ latitude, longitude, category }) => {
-    console.log("longitude = " + longitude + ", latitude = " + latitude + ", category = " + category );
     new mapboxgl.Marker({
       color: categoryColor(category),
       scale: 6,
