@@ -1,11 +1,10 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useMapStore } from '@/store/useMapStore'
 import { coordinate } from '@/components/mapbox/coordinate/coordinate'
-import { useModalStore } from '@/store/useModalStore'
 import { useDijkstraStore } from '@/store/useDijkstraStore'
 import { useDirectionStore } from '@/store/useDirectionStore'
 import { fetchRoute } from '@/utils/api/routeApi'
@@ -13,18 +12,20 @@ import { fetchRecommendations } from '@/utils/api/recommendApi'
 import { RouteMarker } from '@/components/mapbox/MapRouteMarkers'
 import { addMarkers } from '@/components/mapbox/MapRouteMarkers'
 
-
-
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
-const MapComponent = () => {
+interface MapComponentProps {
+  setIsFinalModal: React.Dispatch<React.SetStateAction<boolean>>
+  setIsShow: (isShow:boolean) => void
+}
+
+const MapComponent: React.FC<MapComponentProps> = ({ setIsFinalModal, setIsShow }) => {
   const searchParams = new URLSearchParams(window.location.search);
   const gid = Number(searchParams.get('gid'));
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const { longitude, latitude, init, setLatitude, setLongitude, setInit } =
     useMapStore()
-  const { setIsShow } = useModalStore()
   const coordinates = coordinate
   const { isSimulation } = useDijkstraStore()
   const { setFinished } = useDirectionStore()
@@ -86,9 +87,11 @@ const MapComponent = () => {
       }
       prevCoordinate.current = [coordinate[0], coordinate[1]] // 매 반복마다 prevCoordinate 업데이트
       map.current?.setCenter([coordinate[0], coordinate[1]])
-      await delay(30)
+      await delay(50)
     }
     setFinished(true)
+    setIsFinalModal(true)
+    setIsShow(true)
   }
 
   // 슝슝
