@@ -9,7 +9,7 @@ import { useModalStore } from '@/store/useModalStore'
 import { useDijkstraStore } from '@/store/useDijkstraStore'
 import { useDirectionStore } from '@/store/useDirectionStore'
 
-mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN
+mapboxgl.accessToken = 'pk.eyJ1Ijoic2hpbnNlb25nc3UiLCJhIjoiY20ybDBhcWdvMDc0ODJqcHN6dmJ3M25ocSJ9._gfXViqS433scncHL_ZPmg'
 
 const MapComponent = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null)
@@ -40,8 +40,9 @@ const MapComponent = () => {
     new Promise((resolve) => setTimeout(resolve, ms))
   const moveAlongCoordinates = async () => {
     for (const coordinate of coordinates) {
+      map.current?.setZoom(15)
       map.current?.setCenter([coordinate[0], coordinate[1]])
-      await delay(500)
+      await delay(50)
     }
     setFinished(true)
   }
