@@ -1,0 +1,140 @@
+// app/history/history.module.scss
+
+$primary-color: #2196f3;
+$secondary-color: #f5f5f5;
+$text-color: #333;
+$border-radius: 12px;
+$spacing-unit: 8px;
+
+@mixin message-bubble {
+  padding: $spacing-unit * 2;
+  border-radius: $border-radius;
+  max-width: 80%;
+  
+  .messageHeader {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: $spacing-unit;
+  }
+
+  .messageContent {
+    line-height: 1.5;
+    word-break: break-word;
+  }
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: $spacing-unit * 3;
+  min-height: 100vh;
+  
+  background-image: url('/lyf_background.webp');
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.125rem;
+}
+
+.errorContainer {
+  color: #e53935;
+}
+
+.title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: $spacing-unit * 4;
+  color: #fff;
+}
+
+.chatContainer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-unit * 3;
+}
+
+.chatBlock {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-unit * 2;
+}
+
+.userMessage,
+.jarvisMessage {
+  display: flex;
+  flex-direction: column;
+}
+
+.userMessage {
+  align-self: flex-end;
+  
+  > div {
+    @include message-bubble;
+    background-color: lighten($primary-color, 45%);
+    color: darken($primary-color, 20%);
+  }
+
+  .messageHeader {
+    color: darken($primary-color, 10%);
+  }
+}
+
+.jarvisMessage {
+  align-self: flex-start;
+  
+  > div {
+    @include message-bubble;
+    background-color: $secondary-color;
+    color: $text-color;
+  }
+
+  .messageHeader {
+    background-color: transparent;
+    background-image: url('/robotface.png');
+    background-repeat: no-repeat;
+    background-size: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: $spacing-unit * 2;
+  }
+
+  .userMessage,
+  .jarvisMessage {
+    > div {
+      max-width: 90%;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .container {
+    background-color: #1a1a1a;
+  }
+
+  .title {
+    color: #ffffff;
+  }
+
+  .userMessage {
+    > div {
+      background-color: darken($primary-color, 20%);
+      color: #ffffff;
+    }
+  }
+
+  .jarvisMessage {
+    > div {
+      background-color: #2d2d2d;
+      color: #ffffff;
+    }
+  }
+}
